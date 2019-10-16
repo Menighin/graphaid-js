@@ -1,0 +1,26 @@
+{
+  "name": "graphaid-js",
+  "version": "1.0.0",
+  "description": "Visualize and interact with graphs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "dev": "webpack-dev-server --open"
+  },
+  "keywords": [
+    "graph",
+    "dijkstra",
+    "canvas"
+  ],
+  "author": "Joao Menighin",
+  "license": "MIT",
+  "devDependencies": {
+    "html-webpack-plugin": "^3.2.0",
+    "ts-loader": "^6.2.0",
+    "typescript": "^3.6.4",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-server": "^3.8.2"
+  }
+}
