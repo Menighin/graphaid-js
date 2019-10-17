@@ -1,5 +1,6 @@
-import Test from './lib/test';
+import Graphaid from './lib/Graphaid';
+import Hammer from 'hammerjs';
 
 window.onload = function() {
-    document.getElementById('placeholder').innerHTML = Test.title;
+    const wat = new Graphaid('placeholder');
 }
