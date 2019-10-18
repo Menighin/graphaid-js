@@ -64,19 +64,19 @@ export default class CanvasModule implements IInteractionHandler, IDrawable {
     }
 
     public onMouseWheel(pointer: IPointer, value: number): void {
-
+        this.camera.zoom(pointer, value);
     }
 
     public onDragStart(pointer: IPointer): void {
-        this.camera.translateCameraStart(pointer.clientPosition);
+        this.camera.translateStart(pointer.clientPosition);
     }
 
     public onDrag(pointerCurrent: IPointer, pointerStart: IPointer): void {
-        this.camera.translateCamera(pointerCurrent.clientPosition, pointerStart.clientPosition);
+        this.camera.translate(pointerCurrent.clientPosition, pointerStart.clientPosition);
     }
 
     public onDragEnd(pointerEnd: IPointer, pointerStart: IPointer): void {
-        this.camera.translateCameraEnd(pointerEnd.clientPosition);
+        this.camera.translateEnd(pointerEnd.clientPosition);
     }
 
     /**

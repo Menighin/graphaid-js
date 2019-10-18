@@ -27,6 +27,8 @@ export class InteractionModule {
         this._hammer.on('panstart', this.onDragStart.bind(this));
         this._hammer.on('panmove', this.onDrag.bind(this));
         this._hammer.on('panend', this.onDragEnd.bind(this));
+
+        this._hammer.get('pan').set({ direction: Hammer.DIRECTION_ALL });
     }
 
     private onTouch(event: HammerInput): void {
