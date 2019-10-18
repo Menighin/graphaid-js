@@ -2,10 +2,11 @@ import CanvasModule from './CanvasModule';
 
 export default class Graphaid {
 
-    canvasModule: CanvasModule;
+    private _canvasModule: CanvasModule;
 
     constructor(div: string) {
-        this.canvasModule = new CanvasModule(div);
+        this._canvasModule = new CanvasModule(div);
+        this._canvasModule.initDraw();
     }
 
 }

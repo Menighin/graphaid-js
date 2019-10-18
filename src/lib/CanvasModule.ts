@@ -1,24 +1,104 @@
-export default class CanvasModule {
+import { InteractionModule, IInteractionHandler } from './InteractionModule';
+import CameraModule from './CameraModule';
+import { Point, Pointer } from './CommonsModule';
+import { IDrawable, IViewport, DrawerModule } from './DrawerModule';
 
-    container: HTMLDivElement;
+export default class CanvasModule implements IInteractionHandler, IDrawable {
+
+    private _container: HTMLDivElement;
+    private _interactionModule: InteractionModule;
+    private _drawerModule: DrawerModule;
+
+    private _ctx: CanvasRenderingContext2D;
+    get ctx(): CanvasRenderingContext2D { return this._ctx; }
+
+    private _camera: CameraModule;
+    get camera(): CameraModule { return this._camera; }
+
     private _canvas: HTMLCanvasElement;
-    ctx: CanvasRenderingContext2D;
-
     get canvas(): HTMLCanvasElement { return this._canvas; }
     set canvas(value: HTMLCanvasElement) { this._canvas = value; }
 
     constructor(div: string) {
-        this.container = document.getElementById(div) as HTMLDivElement;
+        this._container = document.getElementById(div) as HTMLDivElement;
         this.canvas = document.createElement('canvas');
-        this.canvas.width = this.container.clientWidth;
-        this.canvas.height = this.container.clientHeight;
+        this.canvas.width = this._container.clientWidth;
+        this.canvas.height = this._container.clientHeight;
 
-        this.container.innerHTML = '';
-        this.container.appendChild(this.canvas);
-        this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+        this._container.innerHTML = '';
+        this._container.appendChild(this.canvas);
+        this._ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
 
-        this.ctx.moveTo(0, 0);
-        this.ctx.lineTo(this.canvas.width, this.canvas.height);
-        this.ctx.stroke();
+        this._interactionModule = new InteractionModule(this, this);
+
+        this._camera = new CameraModule();
+        this._drawerModule = new DrawerModule(this);
     }
+
+    private xConvertDomToCanvas(x: number): number {
+        return (x - this._camera.translation.x) / this._camera.scale;
+    }
+
+    private yConvertDomToCanvas(y: number): number {
+        return (y - this._camera.translation.y) / this._camera.scale;
+    }
+
+    private xConvertCanvasToDom(x: number): number {
+        return x * this._camera.scale + this._camera.translation.x;
+    }
+
+    private yConvertCanvasToDom(y: number): number {
+        return y * this._camera.scale + this._camera.translation.y;
+    }
+
+    public initDraw(): void {
+        this._drawerModule.draw();
+    }
+
+    public onMouseClick(pointer: Pointer): void {
+
+    }
+
+    public onMouseMove(pointer: Pointer): void {
+        throw new Error("Method not implemented.");
+    }
+
+    public onMouseWheel(pointer: Pointer, value: number): void {
+        throw new Error("Method not implemented.");
+    }
+
+    public onDrag(pointer: Pointer): void {
+        throw new Error("Method not implemented.");
+    }
+
+    public onDragEnd(pointer: Pointer): void {
+        throw new Error("Method not implemented.");
+    }
+
+    public initDrawing(): void {
+
+    }
+
+    /**
+     * Converts a client point (DOM) to a point in the canvas
+     * @param clientPoint The point in client coordinates
+     */
+    public toCanvasPoint(clientPoint: Point): Point {
+        return {
+            x: this.xConvertDomToCanvas(clientPoint.x),
+            y: this.yConvertDomToCanvas(clientPoint.y)
+        };
+    }
+
+    /**
+     * Converts a point in the canvas to a point in the client (DOM)
+     * @param canvasPoint The point in canvas coordinates
+     */
+    public toClientPoint(canvasPoint: Point): Point {
+        return {
+            x: this.xConvertCanvasToDom(canvasPoint.x),
+            y: this.yConvertCanvasToDom(canvasPoint.y)
+        };
+    }
+
 }
