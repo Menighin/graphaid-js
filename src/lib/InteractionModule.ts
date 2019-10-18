@@ -1,39 +1,42 @@
 import CanvasModule from './CanvasModule';
-import { Point, Pointer } from './CommonsModule';
+import { Point, IPointer, IPoint } from './CommonsModule';
 import Hammer from 'hammerjs';
 
 export class InteractionModule {
 
     private _canvasModule: CanvasModule;
     private _hammer: HammerManager;
-    private _touch: Point;
+    private _touch: IPointer;
     private _interactionHandler: IInteractionHandler;
+    private _isDragging: boolean = false;
 
-    constructor(canvasModule: CanvasModule, eventsHandler: IInteractionHandler) {
+    constructor(canvasModule: CanvasModule, interactionHandler: IInteractionHandler) {
         this._canvasModule = canvasModule;
         this._hammer = new Hammer(canvasModule.canvas);
-        this._interactionHandler = eventsHandler;
+        this._interactionHandler = interactionHandler;
 
         this.bindEvents();
     }
 
     private bindEvents(): void {
         this._canvasModule.canvas.addEventListener('mousewheel', e => this.onMouseWheel(e as WheelEvent));
-        this._canvasModule.canvas.addEventListener('mousemove', this.onMouseMove);
+        this._canvasModule.canvas.addEventListener('mousemove', this.onMouseMove.bind(this));
 
-        this._hammer.on('hammer.input', this.onTouch);
-        this._hammer.on('tap', this.onMouseClick);
-        this._hammer.on('panmove', this.onDrag);
-        this._hammer.on('panend', this.onDragEnd);
+        this._hammer.on('hammer.input', this.onTouch.bind(this));
+        this._hammer.on('tap', this.onMouseClick.bind(this));
+        this._hammer.on('panstart', this.onDragStart.bind(this));
+        this._hammer.on('panmove', this.onDrag.bind(this));
+        this._hammer.on('panend', this.onDragEnd.bind(this));
     }
 
     private onTouch(event: HammerInput): void {
         if (event.isFirst)
-            this._touch = { x: event.center.x, y: event.center.y };
+            this._touch = this.getPointer(event.center);
     }
 
     private onMouseMove(event: MouseEvent): void {
-        this._interactionHandler.onMouseMove(this.getPointer({ x: event.x, y: event.y }));
+        if (!this._isDragging)
+            this._interactionHandler.onMouseMove(this.getPointer({ x: event.x, y: event.y }));
     }
 
     private onMouseClick(event: HammerInput): void {
@@ -63,20 +66,25 @@ export class InteractionModule {
         event.preventDefault();
     }
 
+    private onDragStart(event: HammerInput) {
+        this._isDragging = true;
+        this._interactionHandler.onDragStart(this.getPointer(event.center));
+    }
+
     private onDrag(event: HammerInput) {
-        this._interactionHandler.onDrag(this.getPointer(event.center));
+        this._interactionHandler.onDrag(this.getPointer(event.center), this._touch);
     }
 
     private onDragEnd(event: HammerInput) {
-        let pointer = this.getPointer(event.center);
-        this._interactionHandler.onDragEnd(pointer);
+        this._interactionHandler.onDragEnd(this.getPointer(event.center), this._touch);
+        this._isDragging = false;
     }
 
-    private getPointer(point: Point): Pointer {
-        const clientPoint = {
-            x: point.x - this._canvasModule.canvas.getBoundingClientRect().left,
-            y: point.y - this._canvasModule.canvas.getBoundingClientRect().top
-        };
+    private getPointer(point: IPoint): IPointer {
+        const clientPoint = new Point(
+            point.x - this._canvasModule.canvas.getBoundingClientRect().left,
+            point.y - this._canvasModule.canvas.getBoundingClientRect().top
+        );
 
         const canvasPoint = this._canvasModule.toCanvasPoint(clientPoint);
         return {
@@ -87,9 +95,10 @@ export class InteractionModule {
 }
 
 export interface IInteractionHandler {
-    onMouseMove(pointer: Pointer): void;
-    onMouseClick(pointer: Pointer): void;
-    onMouseWheel(pointer: Pointer, value: number): void;
-    onDrag(pointer: Pointer): void;
-    onDragEnd(pointer: Pointer): void;
+    onMouseMove(pointer: IPointer): void;
+    onMouseClick(pointer: IPointer): void;
+    onMouseWheel(pointer: IPointer, value: number): void;
+    onDragStart(pointer: IPointer): void,
+    onDrag(pointerCurrent: IPointer, pointerStart: IPointer): void;
+    onDragEnd(pointerEnd: IPointer, pointerStart: IPointer): void;
 }

@@ -25,16 +25,17 @@ export class DrawerModule {
             ctx.translate(camera.translation.x, camera.translation.y);
             ctx.scale(camera.scale, camera.scale);
 
-            ctx.moveTo(0, 0);
-            ctx.lineTo(100, 100);
+            ctx.beginPath();
+            ctx.moveTo(100, 100);
+            ctx.lineTo(150, 150);
             ctx.stroke();
 
             ctx.restore();
 
             this._isDrawing = false;
 
-            requestAnimationFrame(this.draw.bind(this));
         }
+        requestAnimationFrame(this.draw.bind(this));
     }
 
 }

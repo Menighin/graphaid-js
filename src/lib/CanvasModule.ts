@@ -1,6 +1,6 @@
 import { InteractionModule, IInteractionHandler } from './InteractionModule';
 import CameraModule from './CameraModule';
-import { Point, Pointer } from './CommonsModule';
+import { Point, IPointer, IPoint } from './CommonsModule';
 import { IDrawable, IViewport, DrawerModule } from './DrawerModule';
 
 export default class CanvasModule implements IInteractionHandler, IDrawable {
@@ -55,50 +55,44 @@ export default class CanvasModule implements IInteractionHandler, IDrawable {
         this._drawerModule.draw();
     }
 
-    public onMouseClick(pointer: Pointer): void {
+    public onMouseClick(pointer: IPointer): void {
 
     }
 
-    public onMouseMove(pointer: Pointer): void {
-        throw new Error("Method not implemented.");
+    public onMouseMove(pointer: IPointer): void {
+        console.log('mouse move');
     }
 
-    public onMouseWheel(pointer: Pointer, value: number): void {
-        throw new Error("Method not implemented.");
+    public onMouseWheel(pointer: IPointer, value: number): void {
+
     }
 
-    public onDrag(pointer: Pointer): void {
-        throw new Error("Method not implemented.");
+    public onDragStart(pointer: IPointer): void {
+        this.camera.translateCameraStart(pointer.clientPosition);
     }
 
-    public onDragEnd(pointer: Pointer): void {
-        throw new Error("Method not implemented.");
+    public onDrag(pointerCurrent: IPointer, pointerStart: IPointer): void {
+        this.camera.translateCamera(pointerCurrent.clientPosition, pointerStart.clientPosition);
     }
 
-    public initDrawing(): void {
-
+    public onDragEnd(pointerEnd: IPointer, pointerStart: IPointer): void {
+        this.camera.translateCameraEnd(pointerEnd.clientPosition);
     }
 
     /**
      * Converts a client point (DOM) to a point in the canvas
      * @param clientPoint The point in client coordinates
      */
-    public toCanvasPoint(clientPoint: Point): Point {
-        return {
-            x: this.xConvertDomToCanvas(clientPoint.x),
-            y: this.yConvertDomToCanvas(clientPoint.y)
-        };
+    public toCanvasPoint(clientPoint: IPoint): Point {
+        return new Point(this.xConvertDomToCanvas(clientPoint.x), this.yConvertDomToCanvas(clientPoint.y));
     }
 
     /**
      * Converts a point in the canvas to a point in the client (DOM)
      * @param canvasPoint The point in canvas coordinates
      */
-    public toClientPoint(canvasPoint: Point): Point {
-        return {
-            x: this.xConvertCanvasToDom(canvasPoint.x),
-            y: this.yConvertCanvasToDom(canvasPoint.y)
-        };
+    public toClientPoint(canvasPoint: IPoint): Point {
+        return new Point(this.xConvertCanvasToDom(canvasPoint.x), this.yConvertCanvasToDom(canvasPoint.y));
     }
 
 }
