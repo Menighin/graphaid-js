@@ -1,13 +1,17 @@
 import { InteractionModule, IInteractionHandler } from './InteractionModule';
 import CameraModule from './CameraModule';
-import { Point, IPointer, IPoint } from './CommonsModule';
 import { IDrawable, IViewport, DrawerModule } from './DrawerModule';
+import IPointer from '../models/interfaces/IPointer';
+import IPoint from '../models/interfaces/IPoint';
+import Point from '../models/Point';
 
 export default class CanvasModule implements IInteractionHandler, IDrawable {
 
     private _container: HTMLDivElement;
     private _interactionModule: InteractionModule;
     private _drawerModule: DrawerModule;
+    private _isDrawing: boolean = false;
+    private _requestRedraw: boolean = true;
 
     private _ctx: CanvasRenderingContext2D;
     get ctx(): CanvasRenderingContext2D { return this._ctx; }
@@ -52,7 +56,24 @@ export default class CanvasModule implements IInteractionHandler, IDrawable {
     }
 
     public initDraw(): void {
-        this._drawerModule.draw();
+        this.draw();
+    }
+
+    private draw(): void {
+
+        if (!this._isDrawing && this._requestRedraw) {
+            this._isDrawing = false;
+
+            this._drawerModule.draw();
+
+            this._requestRedraw = false;
+        }
+
+        requestAnimationFrame(this.draw.bind(this));
+    }
+
+    public requestRedraw(): void {
+        this._requestRedraw = true;
     }
 
     public onMouseClick(pointer: IPointer): void {
@@ -65,18 +86,22 @@ export default class CanvasModule implements IInteractionHandler, IDrawable {
 
     public onMouseWheel(pointer: IPointer, value: number): void {
         this.camera.zoom(pointer, value);
+        this.requestRedraw();
     }
 
     public onDragStart(pointer: IPointer): void {
         this.camera.translateStart(pointer.clientPosition);
+        this.requestRedraw();
     }
 
     public onDrag(pointerCurrent: IPointer, pointerStart: IPointer): void {
         this.camera.translate(pointerCurrent.clientPosition, pointerStart.clientPosition);
+        this.requestRedraw();
     }
 
     public onDragEnd(pointerEnd: IPointer, pointerStart: IPointer): void {
         this.camera.translateEnd(pointerEnd.clientPosition);
+        this.requestRedraw();
     }
 
     /**

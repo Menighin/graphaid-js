@@ -1,4 +1,4 @@
-import CanvasModule from './CanvasModule';
+import CanvasModule from './modules/CanvasModule';
 
 export default class Graphaid {
 

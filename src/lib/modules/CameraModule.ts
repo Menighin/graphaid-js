@@ -1,5 +1,6 @@
-import { Point, IPointer } from './CommonsModule';
 import { IViewport } from './DrawerModule';
+import Point from '../models/Point';
+import IPointer from '../models/interfaces/IPointer';
 
 export default class CameraModule implements IViewport {
 

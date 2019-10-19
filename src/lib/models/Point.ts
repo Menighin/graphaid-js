@@ -1,11 +1,6 @@
-export interface IPoint {
-    x: number,
-    y: number,
-    diffWith?(p: IPoint): IPoint,
-    distanceTo?(p: IPoint): number
-}
+import IPoint from "./interfaces/IPoint";
 
-export class Point implements IPoint {
+export default class Point implements IPoint {
     private _x: number;
     get x() { return this._x; }
     set x(value) { this._x = value; }
@@ -28,9 +23,8 @@ export class Point implements IPoint {
         const b = this.y - p.y;
         return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
     }
-}
 
-export interface IPointer {
-    canvasPosition: Point,
-    clientPosition: Point
+    public toString(): string {
+        return `[${this.x}, ${this.y}]`;
+    }
 }

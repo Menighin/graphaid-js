@@ -1,6 +1,8 @@
 import CanvasModule from './CanvasModule';
-import { Point, IPointer, IPoint } from './CommonsModule';
 import Hammer from 'hammerjs';
+import IPointer from '../models/interfaces/IPointer';
+import IPoint from '../models/interfaces/IPoint';
+import Point from '../models/Point';
 
 export class InteractionModule {
 
