@@ -1,11 +1,13 @@
 import { InteractionModule, IInteractionHandler } from './InteractionModule';
 import CameraModule from './CameraModule';
-import { IDrawable, IViewport, DrawerModule } from './DrawerModule';
 import IPointer from '../models/interfaces/IPointer';
 import IPoint from '../models/interfaces/IPoint';
 import Point from '../models/Point';
+import DrawerModule from './drawerModule/DrawerModule';
+import ICanvas from './drawerModule/interfaces/ICanvas';
+import Circle from './drawerModule/models/Circle';
 
-export default class CanvasModule implements IInteractionHandler, IDrawable {
+export default class CanvasModule implements IInteractionHandler, ICanvas {
 
     private _container: HTMLDivElement;
     private _interactionModule: InteractionModule;
@@ -64,7 +66,19 @@ export default class CanvasModule implements IInteractionHandler, IDrawable {
         if (!this._isDrawing && this._requestRedraw) {
             this._isDrawing = false;
 
-            this._drawerModule.draw();
+            const c1 = new Circle();
+            c1.radius = 50;
+            c1.position = {x: 100, y: 100};
+
+            const c2 = new Circle();
+            c2.radius = 40;
+            c2.isFilled = true;
+            c2.position = {x: 300, y: 100};
+
+            this._drawerModule.bufferShape(c1);
+            this._drawerModule.bufferShape(c2);
+
+            this._drawerModule.flushDraw();
 
             this._requestRedraw = false;
         }
