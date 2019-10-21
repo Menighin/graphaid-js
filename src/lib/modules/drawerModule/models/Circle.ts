@@ -11,5 +11,9 @@ export default class Circle extends Shape {
     public get radius() { return this._radius; }
     public set radius(value) { this._radius = value; }
 
+    constructor(init?: Partial<Circle>) {
+        super(init);
+        Object.assign(this, init);
+    }
 
 }

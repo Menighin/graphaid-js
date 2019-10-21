@@ -28,5 +28,7 @@ export default class Shape {
         return [this.layer, this.strokeStyle, this.fillStyle, this.isStroke, this.isFilled, this.lineWidth].join('-');
     }
 
-
+    constructor(init?: Partial<Shape>) {
+        Object.assign(this, init);
+    }
 }

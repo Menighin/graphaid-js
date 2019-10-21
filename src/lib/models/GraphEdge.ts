@@ -12,10 +12,10 @@ export default class GraphEdge {
     public get isBidirectional() { return this._isBidirectional; }
     public set isBidirectional(value) { this._isBidirectional = value; }
 
-    constructor(origin: number, destination: number, isBidirectional: boolean = false) {
-        this.origin = origin;
-        this.destination = destination;
-        this.isBidirectional = isBidirectional;
+    constructor(init: Partial<GraphEdge>) {
+        if (!init.origin || !init.destination)
+            throw new Error('[origin] and [destination] are mandatory while creating a GraphEdge');
+        Object.assign(this, init);        
     }
 
 }

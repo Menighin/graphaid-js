@@ -6,6 +6,7 @@ import Point from '../models/Point';
 import DrawerModule from './drawerModule/DrawerModule';
 import ICanvas from './drawerModule/interfaces/ICanvas';
 import Circle from './drawerModule/models/Circle';
+import IDrawable from './interfaces/IDrawable';
 
 export default class CanvasModule implements IInteractionHandler, ICanvas {
 
@@ -14,6 +15,7 @@ export default class CanvasModule implements IInteractionHandler, ICanvas {
     private _drawerModule: DrawerModule;
     private _isDrawing: boolean = false;
     private _requestRedraw: boolean = true;
+    private _beforeDrawActions: Array<IDrawable> = [];
 
     private _ctx: CanvasRenderingContext2D;
     get ctx(): CanvasRenderingContext2D { return this._ctx; }
@@ -61,22 +63,17 @@ export default class CanvasModule implements IInteractionHandler, ICanvas {
         this.draw();
     }
 
+    public addBeforeDrawCallback(drawable: IDrawable): void {
+        this._beforeDrawActions.push(drawable);
+    }
+
     private draw(): void {
 
         if (!this._isDrawing && this._requestRedraw) {
             this._isDrawing = false;
 
-            const c1 = new Circle();
-            c1.radius = 50;
-            c1.position = {x: 100, y: 100};
-
-            const c2 = new Circle();
-            c2.radius = 40;
-            c2.isFilled = true;
-            c2.position = {x: 300, y: 100};
-
-            this._drawerModule.bufferShape(c1);
-            this._drawerModule.bufferShape(c2);
+            for (const action of this._beforeDrawActions)
+                action.draw(this._drawerModule);
 
             this._drawerModule.flushDraw();
 
