@@ -18,13 +18,18 @@ export default class Graphaid implements IDrawable {
 
         this._nodes.push(new GraphNode({id: 1, value: 10, position: new Point(100, 100)}));
         this._nodes.push(new GraphNode({id: 2, value: 10, position: new Point(200, 100)}));
-
-        this._canvasModule.initDraw();
-
+        this._nodes.push(new GraphNode({id: 3, value: 10, position: new Point(300, 200)}));
+        this._nodes.push(new GraphNode({id: 4, value: 10, position: new Point(400, 200)}));
+        this._nodes.push(new GraphNode({id: 5, value: 10, position: new Point(320, 200)}));
+        this._nodes.push(new GraphNode({id: 6, value: 10, position: new Point(340, 200)}));
 
         const bht = new BarnesHutTree(new Point(0, 0), new Point(500, 300));
+        bht.debug = true;
         for (const n of this._nodes)
             bht.insert(n);
+        
+        this._canvasModule.addBeforeDrawCallback(bht);
+        this._canvasModule.initDraw();
     }
 
     public addNode(node: GraphNode) {
@@ -35,8 +40,9 @@ export default class Graphaid implements IDrawable {
 
         for (const node of this._nodes) {
             const circle = new Circle({
-                radius: 20,
-                position: node.position
+                radius: 5,
+                position: node.position,
+                isFilled: true
             });
 
             drawerModule.bufferShape(circle);

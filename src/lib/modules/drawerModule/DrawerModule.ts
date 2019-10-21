@@ -2,14 +2,15 @@ import ICanvas from "./interfaces/ICanvas";
 import AbstractShape from "./models/Shape";
 import Circle from "./models/Circle";
 import Shape from "./models/Shape";
+import Line from "./models/Line";
 
 export default class DrawerModule {
 
-    private _drawable: ICanvas;
+    private _canvas: ICanvas;
     private _shapesBuffer: Array<AbstractShape> = [];
 
-    constructor(drawable: ICanvas) {
-        this._drawable = drawable;
+    constructor(canvas: ICanvas) {
+        this._canvas = canvas;
     }
 
     public bufferShape(shape: AbstractShape): void {
@@ -17,9 +18,9 @@ export default class DrawerModule {
     }
 
     public flushDraw() : void {
-        const ctx = this._drawable.ctx;
+        const ctx = this._canvas.ctx;
         const canvas = ctx.canvas;
-        const camera = this._drawable.camera;
+        const camera = this._canvas.camera;
         
         // Clear the canvas
         ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
@@ -52,6 +53,10 @@ export default class DrawerModule {
             for (const shape of shapes) {
                 if (shape instanceof Circle)
                     this.drawCircle(shape);
+                else if (shape instanceof Line) 
+                    this.drawLine(shape);
+                else
+                    throw new Error(`DrawerModule does not know how to draw a [${shape.constructor.name}]`);
             }
 
             if (shapeProperties.isStroke)
@@ -67,8 +72,20 @@ export default class DrawerModule {
     }
 
     private drawCircle(circle: Circle): void {
-        const ctx = this._drawable.ctx;
+        const ctx = this._canvas.ctx;
         ctx.moveTo(circle.position.x + circle.radius, circle.position.y);
         ctx.arc(circle.position.x, circle.position.y, circle.radius, 0, 2 * Math.PI);
+    }
+
+    private drawLine(line: Line): void {
+        const ctx = this._canvas.ctx;
+        
+        for (let i = 0; i < line.points.length; i++) {
+            const point = line.points[i];
+            if (i == 0)
+                ctx.moveTo(point.x, point.y);
+            else
+                ctx.lineTo(point.x, point.y);
+        }
     }
 }
