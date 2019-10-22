@@ -1,4 +1,4 @@
-import { IBody } from "./BarnersHutTree";
+import { IBody } from "./BarnesHutTree";
 import Point from "./Point";
 
 export default class GraphNode implements IBody {

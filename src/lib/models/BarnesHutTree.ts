@@ -15,7 +15,7 @@ export default class BarnesHutTree implements IDrawable {
     public set debug(value) { this._debug = value; }
 
     constructor(topLeft: Point, bottomRight: Point) {
-        this.root = new BarnesHutNode(new BarnersHutRegion(topLeft, bottomRight, 'root'));
+        this.root = new BarnesHutNode(new BarnesHutRegion(topLeft, bottomRight, 'root'));
     }
 
     public insert(body: IBody): void {
@@ -40,6 +40,8 @@ export default class BarnesHutTree implements IDrawable {
                 foundThePlace = true;
             }
         }
+
+        this.calculateMassCenter(this._root);
     }
 
     private splitNewRegions(parent: BarnesHutNode): void {
@@ -75,7 +77,7 @@ export default class BarnesHutTree implements IDrawable {
                     break;
             }
 
-            parent.children.push(new BarnesHutNode(new BarnersHutRegion(topLeft, bottomRight, label), parent));
+            parent.children.push(new BarnesHutNode(new BarnesHutRegion(topLeft, bottomRight, label), parent));
         }
 
         // Move the body from the parent node to one of the children
@@ -84,6 +86,34 @@ export default class BarnesHutTree implements IDrawable {
             newGrave.body = parent.body;
             parent.body = null;
         }
+    }
+
+    /**
+     * Recursively calculates the center of mass for the node
+     * @param node The node to calculate the center of mass
+     */
+    private calculateMassCenter(node: BarnesHutNode): void {
+        if (!node.children.any()) {
+            if (node.body !== null) {
+                node.mass = node.body.mass;
+                node.position = node.body.position;
+            }
+            return;
+        }
+
+        let totalWeight = 0;
+        let weightedX = 0;
+        let weightedY = 0;
+        node.children.forEach(n => {
+            this.calculateMassCenter(n);
+            if (n.mass > 0) {
+                totalWeight += n.mass;
+                weightedX += n.mass * n.position.x;
+                weightedY += n.mass * n.position.y;
+            }
+        });
+
+        node.position = new Point(weightedX / totalWeight, weightedY / totalWeight);
     }
 
     draw(drawerModule: DrawerModule): void {
@@ -118,7 +148,7 @@ export default class BarnesHutTree implements IDrawable {
             const lvl = item[0];
             const node = item[1];
 
-            console.log(`%c${'\t'.repeat(lvl)} R | ${node.mass} | ${node.region}`, 'color: yellow');
+            console.log(`%c${'\t'.repeat(lvl)} R | ${node.mass} | ${node.position} | ${node.region}`, 'color: yellow');
 
             if (node.body)
                 console.log(`%c${'\t'.repeat(lvl + 1)} B | ${node.body.mass} | ${node.body.position}`, 'color: red');
@@ -136,11 +166,11 @@ export class BarnesHutNode {
     public get mass() { return this._mass; }
     public set mass(value) { this._mass = value; }
 
-    private _position: Point | null;
+    private _position: Point;
     public get position() { return this._position; }
     public set position(value) { this._position = value; }
 
-    private _region: BarnersHutRegion;
+    private _region: BarnesHutRegion;
     public get region() { return this._region; }
     public set region(value) { this._region = value; }
 
@@ -156,18 +186,18 @@ export class BarnesHutNode {
     public get body() { return this._body; }
     public set body(value) { this._body = value; }
 
-    constructor(region: BarnersHutRegion, parent: BarnesHutNode | null = null) {
+    constructor(region: BarnesHutRegion, parent: BarnesHutNode | null = null) {
         this.region = region;
         this.mass = 0;
         this.parent = parent;
         this.children = [];
         this.body = null;
-        this.position = null;
+        this.position = new Point(0, 0);
     }
     
 }
 
-class BarnersHutRegion {
+class BarnesHutRegion {
     
     private _p1: Point;
     public get p1() { return this._p1; }

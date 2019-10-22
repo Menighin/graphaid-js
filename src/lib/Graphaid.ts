@@ -5,7 +5,7 @@ import DrawerModule from '@modules/drawerModule/DrawerModule';
 import Circle from './modules/drawerModule/models/Circle';
 import GraphNode from './models/GraphNode';
 import Point from './models/Point';
-import BarnesHutTree from './models/BarnersHutTree';
+import BarnesHutTree from './models/BarnesHutTree';
 
 export default class Graphaid implements IDrawable {
 
