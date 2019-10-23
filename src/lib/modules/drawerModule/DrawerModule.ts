@@ -32,7 +32,7 @@ export default class DrawerModule {
 
         // Grouping shapes for fast drawing
         const shapeGroups: { [shape: string]: Array<AbstractShape>} = {};
-        for (const s of this._shapesBuffer) {
+        for (const s of this._shapesBuffer.sort((a, b) => a.layer - b.layer)) {
             const key = s.toString();
             if (!shapeGroups[key])
                 shapeGroups[key] = [];

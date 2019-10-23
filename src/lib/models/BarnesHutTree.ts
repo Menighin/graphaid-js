@@ -116,7 +116,58 @@ export default class BarnesHutTree implements IDrawable {
         node.position = new Point(weightedX / totalWeight, weightedY / totalWeight);
     }
 
-    draw(drawerModule: DrawerModule): void {
+    public calculateForces(body: IBody): {fx: number, fy: number} {
+        const queue: BarnesHutNode[] = [this._root];
+        const res = {fx: 0, fy: 0};
+
+        while (queue.any()) {
+            const node = queue.shift()!;
+
+
+            // If this is not a node with a body, it means it is an internal node, check theta to know
+            // Wheter it should keep searching or use a barnes hut node as approximation
+            if (!node.body) {
+
+                if (!node.children.any()) continue; // This is an empty node, so just skip it
+
+                const s = Math.abs(node.region.p1.x - node.region.p2.x);
+                const d = body.position.distanceTo(node.position);
+                const theta = s / d;
+                
+                // Consider the barnes hut node as a body and calculate the force with it
+                if (theta < 0.5) {
+                    const dx = node.position.x - body.position.x;
+                    const dy = node.position.y - body.position.y;
+                    const force = (9.8 * body.mass * node.mass) / (d * d);
+                    res.fx += dx * force;
+                    res.fy += dy * force;
+                } 
+                // Go deeper on the three
+                else {
+                    queue.push(...node.children);
+                }
+
+            }
+            // If there is a body, this is a leaf so use the body to calculate the force
+            else {
+                // Doesn't calculate force on itself
+                if (node.body.id === body.id)
+                    continue;
+
+                const d  = body.position.distanceTo(node.body.position);
+                const dx = node.body.position.x - body.position.x;
+                const dy = node.body.position.y - body.position.y;
+                const force = (9.8 * body.mass * node.body.mass) / (d * d);
+
+                res.fx += dx * force;
+                res.fy += dy * force;
+            }
+
+        }
+        return res;
+    }
+
+    public draw(drawerModule: DrawerModule): void {
 
         if (!this.debug) return;
 
@@ -126,6 +177,8 @@ export default class BarnesHutTree implements IDrawable {
             const node = queue.shift()!;
 
             drawerModule.bufferShape(new Line({
+                layer: 0,
+                strokeStyle: '#ccc',
                 points: [
                     node.region.p1,
                     {x: node.region.p2.x, y: node.region.p1.y},
@@ -135,7 +188,7 @@ export default class BarnesHutTree implements IDrawable {
                 ]
             }));
             
-            queue.push(...node!.children);
+            queue.push(...node.children);
         }
 
         this.print();
@@ -228,6 +281,7 @@ class BarnesHutRegion {
 }
 
 export interface IBody {
+    readonly id: number,
     readonly position: Point,
     readonly mass: number
 }
