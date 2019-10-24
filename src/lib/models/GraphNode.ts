@@ -17,7 +17,7 @@ export default class GraphNode implements IBody {
     public set position(value) { this._position = value; }
 
     constructor(init: Partial<GraphNode>) {
-        if (!init.id)
+        if (init.id == undefined)
             throw new Error('The property [id] is mandatory while creating a GraphNode');
         Object.assign(this, init);
     }

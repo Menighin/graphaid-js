@@ -1,21 +1,40 @@
 import BarnesHutTree, { IBody } from "../models/BarnesHutTree";
 import Point from "../models/Point";
+import IPoint from "../models/interfaces/IPoint";
 
 export default class PhysicsModule {
 
     private _bodies: IBody[];
+    private _speedByBodyId: Record<number, {vx: number, vy: number}>;
 
     constructor() {
         this._bodies = [];
+        this._speedByBodyId = {};
     }
 
     public insert(body: IBody): void {
         this._bodies.push(body);
+        if (!this._speedByBodyId[body.id])
+            this._speedByBodyId[body.id] = { vx: 0, vy: 0};
     }
 
     public simulateStep(): void {
         const tree = this.generateTree();
 
+        this._bodies.forEach(b => {
+            const forces = tree.calculateForces(b);
+            const bodySpeed = this._speedByBodyId[b.id];
+
+            const ax = forces.fx / b.mass;
+            const ay = forces.fy / b.mass;
+
+            bodySpeed.vx += ax * 0.3;
+            bodySpeed.vy += ay * 0.3;
+
+            b.position.x += bodySpeed.vx * 0.3;
+            b.position.y += bodySpeed.vy * 0.3;
+
+        });
     }
 
     public generateTree(): BarnesHutTree {

@@ -162,8 +162,18 @@ export default class BarnesHutTree implements IDrawable {
                 res.fx += dx * force;
                 res.fy += dy * force;
             }
-
         }
+
+        // Adding the central gravity force
+        const dx = -body.position.x;
+        const dy = -body.position.y;
+        const distanceToCenter = Math.sqrt(dx * dx + dy * dy);
+        if (distanceToCenter > 0) {
+            const gravityForce = 9.8 / distanceToCenter;
+            res.fx += dx * gravityForce;
+            res.fy += dy * gravityForce;
+        }
+
         return res;
     }
 

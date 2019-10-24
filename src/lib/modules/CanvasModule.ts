@@ -40,6 +40,7 @@ export default class CanvasModule implements IInteractionHandler, ICanvas {
         this._interactionModule = new InteractionModule(this, this);
 
         this._camera = new CameraModule();
+        this._camera.translation = new Point(this.canvas.width / 2, this.canvas.height / 2);
         this._drawerModule = new DrawerModule(this);
     }
 
@@ -71,13 +72,12 @@ export default class CanvasModule implements IInteractionHandler, ICanvas {
 
         if (!this._isDrawing && this._requestRedraw) {
             this._isDrawing = false;
+            this._requestRedraw = false;
 
             for (const action of this._beforeDrawActions)
                 action.draw(this._drawerModule);
 
             this._drawerModule.flushDraw();
-
-            this._requestRedraw = false;
         }
 
         requestAnimationFrame(this.draw.bind(this));
