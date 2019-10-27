@@ -120,15 +120,27 @@ export default class BarnesHutTree implements IDrawable {
         const queue: BarnesHutNode[] = [this._root];
         const res = {fx: 0, fy: 0};
 
+        // Calculate forces
+        const getForces = (body: IBody, node: IBody, distance: number): {fx: number, fy: number} => {
+            const dx = node.position.x - body.position.x;
+            const dy = node.position.y - body.position.y;
+            const forceAttraction = (9.8 * body.mass * node.mass) / Math.pow(distance, 3);
+            const forceRepulsion = (9.8 * body.mass * node.mass) / Math.pow(distance, 2);
+
+            return {
+                fx: dx * (forceAttraction - forceRepulsion),
+                fy: dy * (forceAttraction - forceRepulsion)
+            }
+        };
+
         while (queue.any()) {
             const node = queue.shift()!;
-
 
             // If this is not a node with a body, it means it is an internal node, check theta to know
             // Wheter it should keep searching or use a barnes hut node as approximation
             if (!node.body) {
 
-                if (!node.children.any()) continue; // This is an empty node, so just skip it
+                if (!node.children.any()) continue; // This is an empty node, just skip it
 
                 const s = Math.abs(node.region.p1.x - node.region.p2.x);
                 const d = body.position.distanceTo(node.position);
@@ -136,11 +148,10 @@ export default class BarnesHutTree implements IDrawable {
                 
                 // Consider the barnes hut node as a body and calculate the force with it
                 if (theta < 0.5) {
-                    const dx = node.position.x - body.position.x;
-                    const dy = node.position.y - body.position.y;
-                    const force = (9.8 * body.mass * node.mass) / (d * d);
-                    res.fx += dx * force;
-                    res.fy += dy * force;
+                    const forces = getForces(body, node, d);
+
+                    res.fx += forces.fx;
+                    res.fy += forces.fy;
                 } 
                 // Go deeper on the three
                 else {
@@ -155,12 +166,10 @@ export default class BarnesHutTree implements IDrawable {
                     continue;
 
                 const d  = body.position.distanceTo(node.body.position);
-                const dx = node.body.position.x - body.position.x;
-                const dy = node.body.position.y - body.position.y;
-                const force = (9.8 * body.mass * node.body.mass) / (d * d);
+                const forces = getForces(body, node, d);
 
-                res.fx += dx * force;
-                res.fy += dy * force;
+                res.fx += forces.fx;
+                res.fy += forces.fy;
             }
         }
 
@@ -168,10 +177,14 @@ export default class BarnesHutTree implements IDrawable {
         const dx = -body.position.x;
         const dy = -body.position.y;
         const distanceToCenter = Math.sqrt(dx * dx + dy * dy);
-        if (distanceToCenter > 0) {
-            const gravityForce = 9.8 / distanceToCenter;
-            res.fx += dx * gravityForce;
-            res.fy += dy * gravityForce;
+        if (distanceToCenter > 50) {
+            const gravity = 2 * 9.8 / distanceToCenter;
+            res.fx += dx * gravity;
+            res.fy += dy * gravity;
+        } else {
+            const gravity = 9.8 / distanceToCenter;
+            res.fx += -dx * gravity;
+            res.fy += -dy * gravity;
         }
 
         return res;
@@ -223,7 +236,11 @@ export default class BarnesHutTree implements IDrawable {
 
 }
 
-export class BarnesHutNode {
+export class BarnesHutNode implements IBody {
+    
+    private _id: number;
+    public get id() { return this._id; }
+    public set id(value) { this._id = value; }
     
     private _mass: number;
     public get mass() { return this._mass; }
@@ -250,6 +267,7 @@ export class BarnesHutNode {
     public set body(value) { this._body = value; }
 
     constructor(region: BarnesHutRegion, parent: BarnesHutNode | null = null) {
+        this.id = -1; // All barnes hut nodes has the ID set to -1 because they are not real nodes
         this.region = region;
         this.mass = 0;
         this.parent = parent;

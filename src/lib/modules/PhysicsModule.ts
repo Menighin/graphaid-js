@@ -21,18 +21,27 @@ export default class PhysicsModule {
     public simulateStep(): void {
         const tree = this.generateTree();
 
+        const timeFrame = 0.2;
+
         this._bodies.forEach(b => {
             const forces = tree.calculateForces(b);
             const bodySpeed = this._speedByBodyId[b.id];
 
+            // Calculate the acelerations
             const ax = forces.fx / b.mass;
             const ay = forces.fy / b.mass;
 
-            bodySpeed.vx += ax * 0.3;
-            bodySpeed.vy += ay * 0.3;
+            // Calculate the speeds
+            bodySpeed.vx += ax * timeFrame;
+            bodySpeed.vy += ay * timeFrame;
 
-            b.position.x += bodySpeed.vx * 0.3;
-            b.position.y += bodySpeed.vy * 0.3;
+            // Cap the speed
+            bodySpeed.vx = Math.min(bodySpeed.vx, 5);
+            bodySpeed.vy = Math.min(bodySpeed.vy, 5);
+
+            // Calculate the new position
+            b.position.x += bodySpeed.vx * timeFrame;
+            b.position.y += bodySpeed.vy * timeFrame;
 
         });
     }
