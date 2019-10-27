@@ -1,13 +1,13 @@
 import CanvasModule from './modules/CanvasModule';
 import './Prototypes';
+import './DebugVariables';
 import IDrawable from '@modules/interfaces/IDrawable';
 import DrawerModule from '@modules/drawerModule/DrawerModule';
 import Circle from './modules/drawerModule/models/Circle';
 import GraphNode from './models/GraphNode';
 import Point from './models/Point';
-import BarnesHutTree from './models/BarnesHutTree';
-import Line from './modules/drawerModule/models/Line';
 import PhysicsModule from './modules/PhysicsModule';
+import Text from './modules/drawerModule/models/Text';
 
 export default class Graphaid implements IDrawable {
 
@@ -19,6 +19,7 @@ export default class Graphaid implements IDrawable {
         this._canvasModule = new CanvasModule(div);
         this._physicsModule = new PhysicsModule();
         this._canvasModule.addBeforeDrawCallback(this);
+        this._canvasModule.addBeforeDrawCallback(this._physicsModule);
 
         // this._nodes.push(new GraphNode({id: 0, value: 10, position: new Point(0, 0)}));
         this._nodes.push(new GraphNode({id: 1, value: 10, position: new Point(100, 100)}));
@@ -30,6 +31,11 @@ export default class Graphaid implements IDrawable {
 
 
         this._nodes.forEach(n => this._physicsModule.insert(n));
+
+        // Setting debug variables so they will appear on chrome console
+        window.graphaidDebug = {
+            nodeLabels: true
+        };
 
         this._canvasModule.initDraw();
     }
@@ -55,26 +61,25 @@ export default class Graphaid implements IDrawable {
                 layer: 10,
                 radius: 5,
                 position: node.position,
+                fillStyle: 'blue',
                 isFilled: true
             });
 
             drawerModule.bufferShape(circle);
-            
-            const bht = this._physicsModule.generateTree();
-            bht.debug = true;
-            bht.draw(drawerModule);
 
-            const forces = bht.calculateForces(node);
 
-            drawerModule.bufferShape(new Line({
-                layer: 10,
-                strokeStyle: 'red',
-                points: [
-                    node.position,
-                    { x: node.position.x + forces.fx, y: node.position.y + forces.fy }
-                ]
-            }));
-
+            if (window.graphaidDebug.nodeLabels) {
+                drawerModule.bufferText(new Text({
+                    text: node.id.toString(),
+                    position: node.position,
+                    font: '5px Arial',
+                    isFilled: true,
+                    isStroke: false,
+                    textAlign: 'center',
+                    textBaseline: 'middle',
+                    fillStyle: 'white'
+                }))
+            }
         }
         this._canvasModule.requestRedraw();
     }

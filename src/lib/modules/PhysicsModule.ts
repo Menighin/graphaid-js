@@ -1,11 +1,15 @@
 import BarnesHutTree, { IBody } from "../models/BarnesHutTree";
 import Point from "../models/Point";
 import IPoint from "../models/interfaces/IPoint";
+import IDrawable from "./interfaces/IDrawable";
+import DrawerModule from "./drawerModule/DrawerModule";
+import Line from "./drawerModule/models/Line";
 
-export default class PhysicsModule {
+export default class PhysicsModule implements IDrawable{
 
     private _bodies: IBody[];
     private _speedByBodyId: Record<number, {vx: number, vy: number}>;
+    private _tree: BarnesHutTree;
 
     constructor() {
         this._bodies = [];
@@ -19,12 +23,12 @@ export default class PhysicsModule {
     }
 
     public simulateStep(): void {
-        const tree = this.generateTree();
+        this._tree = this.generateTree();
 
         const timeFrame = 0.2;
 
         this._bodies.forEach(b => {
-            const forces = tree.calculateForces(b);
+            const forces = this._tree.calculateForces(b);
             const bodySpeed = this._speedByBodyId[b.id];
 
             // Calculate the acelerations
@@ -78,5 +82,23 @@ export default class PhysicsModule {
         this._bodies.forEach(n => tree.insert(n));
 
         return tree;
+    }
+
+    draw(drawerModule: DrawerModule): void {
+        this._tree.debug = true;
+        this._tree.draw(drawerModule);
+
+        for (const body of this._bodies) {
+            const forces = this._tree.calculateForces(body);
+
+            drawerModule.bufferShape(new Line({
+                layer: 10,
+                strokeStyle: 'red',
+                points: [
+                    body.position,
+                    { x: body.position.x + forces.fx, y: body.position.y + forces.fy }
+                ]
+            }));
+        }
     }
 }

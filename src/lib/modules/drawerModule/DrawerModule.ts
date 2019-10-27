@@ -1,20 +1,25 @@
 import ICanvas from "./interfaces/ICanvas";
-import AbstractShape from "./models/Shape";
-import Circle from "./models/Circle";
 import Shape from "./models/Shape";
+import Circle from "./models/Circle";
 import Line from "./models/Line";
+import Text from "./models/Text";
 
 export default class DrawerModule {
 
     private _canvas: ICanvas;
-    private _shapesBuffer: Array<AbstractShape> = [];
+    private _shapesBuffer: Shape[] = [];
+    private _textBuffer: Text[] = [];
 
     constructor(canvas: ICanvas) {
         this._canvas = canvas;
     }
 
-    public bufferShape(shape: AbstractShape): void {
+    public bufferShape(shape: Shape): void {
         this._shapesBuffer.push(shape);
+    }
+
+    public bufferText(text: Text): void {
+        this._textBuffer.push(text);
     }
 
     public flushDraw() : void {
@@ -30,8 +35,18 @@ export default class DrawerModule {
         ctx.translate(camera.translation.x, camera.translation.y);
         ctx.scale(camera.scale, camera.scale);
 
+        // Draw shapes and texts
+        this.drawShapes(ctx);
+        this.drawTexts(ctx);
+
+        ctx.restore();
+
+        this._shapesBuffer = [];
+    }
+
+    private drawShapes(ctx: CanvasRenderingContext2D): void {
         // Grouping shapes for fast drawing
-        const shapeGroups: { [shape: string]: Array<AbstractShape>} = {};
+        const shapeGroups: { [shape: string]: Array<Shape>} = {};
         for (const s of this._shapesBuffer.sort((a, b) => a.layer - b.layer)) {
             const key = s.toString();
             if (!shapeGroups[key])
@@ -65,10 +80,38 @@ export default class DrawerModule {
             if (shapeProperties.isFilled)
                 ctx.fill();
         }
+    }
 
-        ctx.restore();
+    private drawTexts(ctx: CanvasRenderingContext2D) {
+        // Grouping texts for fast drawing
+        const textGroups: { [shape: string]: Text[]} = {};
+        for (const s of this._textBuffer.sort((a, b) => a.layer - b.layer)) {
+            const key = s.toString();
+            if (!textGroups[key])
+                textGroups[key] = [];
+            textGroups[key].push(s);
+        }
 
-        this._shapesBuffer = [];
+        // Drawing texts by group
+        for (const g of Object.keys(textGroups)) {
+            const texts = textGroups[g];
+            const textProperties = texts.first();
+
+            ctx.strokeStyle = textProperties.strokeStyle;
+            ctx.lineWidth = textProperties.lineWidth;
+            ctx.fillStyle = textProperties.fillStyle;
+            ctx.font = textProperties.font;
+            ctx.textAlign = textProperties.textAlign;
+            ctx.textBaseline = textProperties.textBaseline;
+            
+            for (const text of texts) {
+                if (textProperties.isStroke)
+                    ctx.strokeText(text.text, text.position.x, text.position.y);
+                
+                if (textProperties.isFilled)
+                    ctx.fillText(text.text, text.position.x, text.position.y);
+            }
+        }
     }
 
     private drawCircle(circle: Circle): void {
