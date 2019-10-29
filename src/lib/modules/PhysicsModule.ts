@@ -4,6 +4,7 @@ import IPoint from "../models/interfaces/IPoint";
 import IDrawable from "./interfaces/IDrawable";
 import DrawerModule from "./drawerModule/DrawerModule";
 import Line from "./drawerModule/models/Line";
+import Text from "./drawerModule/models/Text";
 
 export default class PhysicsModule implements IDrawable{
 
@@ -99,6 +100,19 @@ export default class PhysicsModule implements IDrawable{
                     { x: body.position.x + forces.fx, y: body.position.y + forces.fy }
                 ]
             }));
+
+            const speed = Math.sqrt(Math.pow(this._speedByBodyId[body.id].vx, 2) + Math.pow(this._speedByBodyId[body.id].vy, 2));
+            drawerModule.bufferText(new Text({
+                text: `speed: ${speed.toFixed(2)}`,
+                position: { x: body.position.x + 10, y: body.position.y },
+                font: '5px Arial',
+                isFilled: true,
+                isStroke: false,
+                textAlign: 'left',
+                textBaseline: 'middle',
+                fillStyle: 'black'
+            }))
+
         }
     }
 }

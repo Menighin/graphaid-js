@@ -112,6 +112,8 @@ export default class DrawerModule {
                     ctx.fillText(text.text, text.position.x, text.position.y);
             }
         }
+
+        this._textBuffer = [];
     }
 
     private drawCircle(circle: Circle): void {
