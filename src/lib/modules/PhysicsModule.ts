@@ -11,6 +11,9 @@ export default class PhysicsModule implements IDrawable{
     private _bodies: IBody[];
     private _speedByBodyId: Record<number, {vx: number, vy: number}>;
     private _tree: BarnesHutTree;
+    private _stabilized = false;
+    private _step = 0;
+    private _hasCalculatedInitialPos = false;
 
     constructor() {
         this._bodies = [];
@@ -24,6 +27,13 @@ export default class PhysicsModule implements IDrawable{
     }
 
     public simulateStep(): void {
+
+        if (!this._hasCalculatedInitialPos) {
+            this._hasCalculatedInitialPos = true;
+            this.calculateInitialPositions();
+        }
+
+
         this._tree = this.generateTree();
 
         const timeFrame = 0.2;
@@ -85,7 +95,7 @@ export default class PhysicsModule implements IDrawable{
         return tree;
     }
 
-    draw(drawerModule: DrawerModule): void {
+    public draw(drawerModule: DrawerModule): void {
         this._tree.debug = true;
         this._tree.draw(drawerModule);
 
@@ -114,5 +124,9 @@ export default class PhysicsModule implements IDrawable{
             }))
 
         }
+    }
+
+    private calculateInitialPositions(): void {
+
     }
 }
