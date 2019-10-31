@@ -11,13 +11,16 @@ export default class PhysicsModule implements IDrawable{
     private _bodies: IBody[];
     private _speedByBodyId: Record<number, {vx: number, vy: number}>;
     private _tree: BarnesHutTree;
-    private _stabilized = false;
     private _step = 0;
-    private _hasCalculatedInitialPos = false;
+
+    private _isStabilized: boolean;
+    public get isStabilized() { return this._isStabilized; }
+    public set isStabilized(value) { this._isStabilized = value; }
 
     constructor() {
         this._bodies = [];
         this._speedByBodyId = {};
+        this.isStabilized = false;
     }
 
     public insert(body: IBody): void {
@@ -28,16 +31,12 @@ export default class PhysicsModule implements IDrawable{
 
     public simulateStep(): void {
 
-        if (!this._hasCalculatedInitialPos) {
-            this._hasCalculatedInitialPos = true;
-            this.calculateInitialPositions();
-        }
-
-
         this._tree = this.generateTree();
+        this._step++;
 
-        const timeFrame = 0.2;
+        const timeFrame = 0.4;
 
+        let averageSpeed = 0;
         this._bodies.forEach(b => {
             const forces = this._tree.calculateForces(b);
             const bodySpeed = this._speedByBodyId[b.id];
@@ -58,7 +57,16 @@ export default class PhysicsModule implements IDrawable{
             b.position.x += bodySpeed.vx * timeFrame;
             b.position.y += bodySpeed.vy * timeFrame;
 
+            // Update max speed
+            averageSpeed += Math.sqrt(Math.pow(this._speedByBodyId[b.id].vx, 2) + Math.pow(this._speedByBodyId[b.id].vy, 2));
         });
+
+        averageSpeed /= this._bodies.length;
+        if (averageSpeed < 2 && this._step > 100) {
+            this._step = 0;
+            this.isStabilized = true;
+        }
+
     }
 
     public generateTree(): BarnesHutTree {
@@ -124,9 +132,5 @@ export default class PhysicsModule implements IDrawable{
             }))
 
         }
-    }
-
-    private calculateInitialPositions(): void {
-
     }
 }

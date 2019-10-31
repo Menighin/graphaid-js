@@ -177,14 +177,10 @@ export default class BarnesHutTree implements IDrawable {
         const dx = -body.position.x;
         const dy = -body.position.y;
         const distanceToCenter = Math.sqrt(dx * dx + dy * dy);
-        if (distanceToCenter > 50) {
+        if (distanceToCenter > 0) {
             const gravity = 2 * 9.8 / distanceToCenter;
             res.fx += dx * gravity;
             res.fy += dy * gravity;
-        } else {
-            const gravity = 9.8 / distanceToCenter;
-            res.fx += -dx * gravity;
-            res.fy += -dy * gravity;
         }
 
         return res;

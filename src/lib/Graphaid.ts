@@ -46,7 +46,8 @@ export default class Graphaid implements IDrawable {
 
     draw(drawerModule: DrawerModule): void {
 
-        this._physicsModule.simulateStep();
+        if (!this._physicsModule.isStabilized)
+            this._physicsModule.simulateStep();
 
         drawerModule.bufferShape(new Circle({
             layer: 100,
@@ -81,6 +82,8 @@ export default class Graphaid implements IDrawable {
                 }))
             }
         }
-        this._canvasModule.requestRedraw();
+        
+        if (!this._physicsModule.isStabilized)
+            this._canvasModule.requestRedraw();
     }
 }
