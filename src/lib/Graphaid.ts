@@ -14,23 +14,13 @@ export default class Graphaid implements IDrawable {
     private _canvasModule: CanvasModule;
     private _physicsModule: PhysicsModule;
     private _nodes: GraphNode[] = [];
+    private _nodesById: Record<number, GraphNode> = {};
 
     constructor(div: string) {
         this._canvasModule = new CanvasModule(div);
         this._physicsModule = new PhysicsModule();
         this._canvasModule.addBeforeDrawCallback(this);
         this._canvasModule.addBeforeDrawCallback(this._physicsModule);
-
-        // this._nodes.push(new GraphNode({id: 0, value: 10, position: new Point(0, 0)}));
-        this._nodes.push(new GraphNode({id: 1, value: 10, position: new Point(100, 100)}));
-        this._nodes.push(new GraphNode({id: 2, value: 10, position: new Point(200, 100)}));
-        this._nodes.push(new GraphNode({id: 3, value: 10, position: new Point(300, 200)}));
-        this._nodes.push(new GraphNode({id: 4, value: 10, position: new Point(320, 200)}));
-        this._nodes.push(new GraphNode({id: 5, value: 10 , position: new Point(340, 200)}));
-        this._nodes.push(new GraphNode({id: 6, value: 10, position: new Point(400, 200)}));
-
-
-        this._nodes.forEach(n => this._physicsModule.insert(n));
 
         // Setting debug variables so they will appear on chrome console
         window.graphaidDebug = {
@@ -41,7 +31,13 @@ export default class Graphaid implements IDrawable {
     }
 
     public addNode(node: GraphNode) {
+        if (this._nodesById[node.id] !== undefined)
+            throw `A node with ID ${node.id} already exists!`;
+
         this._nodes.push(node);
+        this._nodesById[node.id] = node;
+        this._physicsModule.insert(node);
+        this._canvasModule.requestRedraw();
     }
 
     draw(drawerModule: DrawerModule): void {

@@ -1,4 +1,4 @@
-import BarnesHutTree, { IBody } from "../models/BarnesHutTree";
+import BarnesHutTree, { IBody, BarnesHutNode } from "../models/BarnesHutTree";
 import Point from "../models/Point";
 import IPoint from "../models/interfaces/IPoint";
 import IDrawable from "./interfaces/IDrawable";
@@ -24,12 +24,20 @@ export default class PhysicsModule implements IDrawable{
     }
 
     public insert(body: IBody): void {
+        if (this._bodies.any())
+            this.calculateInitialPosition(body);
+
         this._bodies.push(body);
         if (!this._speedByBodyId[body.id])
             this._speedByBodyId[body.id] = { vx: 0, vy: 0};
+        
+        // Re-stabilize
+        this._isStabilized = false;
     }
 
     public simulateStep(): void {
+
+        if (this._bodies.length === 0) return;
 
         this._tree = this.generateTree();
         this._step++;
@@ -104,6 +112,9 @@ export default class PhysicsModule implements IDrawable{
     }
 
     public draw(drawerModule: DrawerModule): void {
+
+        if (this._bodies.length === 0) return;
+
         this._tree.debug = true;
         this._tree.draw(drawerModule);
 
@@ -131,6 +142,37 @@ export default class PhysicsModule implements IDrawable{
                 fillStyle: 'black'
             }))
 
+        }
+    }
+
+    private calculateInitialPosition(body: IBody): void {
+        if (this._tree === undefined)
+            this._tree = this.generateTree();
+        
+        // Find empty node to add the new body
+        const queue = [ this._tree.root ];
+        let nodeToPut = this._tree.root;
+        while (queue.any()) {
+            const node = queue.shift()!;
+
+            if (node.body !== null)
+                nodeToPut = node;
+            
+            if (node.body === null && !node.children.any()) {
+                nodeToPut = node;
+                break;
+            }
+            queue.push(...node.children);
+        }
+
+        body.position.x = (nodeToPut.region.p1.x + nodeToPut.region.p2.x) / 2;
+        body.position.y = (nodeToPut.region.p1.y + nodeToPut.region.p2.y) / 2;
+
+        // Safe check to not put node in the same position as another
+        while (nodeToPut.body !== null && nodeToPut.body.position.distanceTo(body.position) < 5) 
+        {
+            body.position.x += Math.floor(Math.random() * 20) + 10;
+            body.position.y += Math.floor(Math.random() * 20) + 10;
         }
     }
 }
