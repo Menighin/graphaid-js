@@ -41,9 +41,10 @@ export default class Graphaid implements IDrawable {
     }
 
     draw(drawerModule: DrawerModule): void {
-
+        console.log('oi');
         if (!this._physicsModule.isStabilized)
             this._physicsModule.simulateStep();
+        console.log('ei');
 
         drawerModule.bufferShape(new Circle({
             layer: 100,

@@ -146,8 +146,7 @@ export default class PhysicsModule implements IDrawable{
     }
 
     private calculateInitialPosition(body: IBody): void {
-        if (this._tree === undefined)
-            this._tree = this.generateTree();
+        this._tree = this.generateTree();
         
         // Find empty node to add the new body
         const queue = [ this._tree.root ];
@@ -171,8 +170,8 @@ export default class PhysicsModule implements IDrawable{
         // Safe check to not put node in the same position as another
         while (nodeToPut.body !== null && nodeToPut.body.position.distanceTo(body.position) < 5) 
         {
-            body.position.x += Math.floor(Math.random() * 20) + 10;
-            body.position.y += Math.floor(Math.random() * 20) + 10;
+            body.position.x += Math.floor(Math.random() * 20) + 100;
+            body.position.y += Math.floor(Math.random() * 20) + 100;
         }
     }
 }
