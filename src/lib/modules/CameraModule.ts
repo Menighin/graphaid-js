@@ -39,7 +39,7 @@ export default class CameraModule implements IViewport {
 
         const oldScale = this.scale;
         const clientPoint = pointer.clientPosition;
-        this.scale += value;
+        this.scale += value / 25 * this.scale;
         this.scale = Math.max(0.2, this.scale);
         this.scale = Math.min(15, this.scale);
 

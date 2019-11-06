@@ -50,7 +50,7 @@ export class InteractionModule {
     private onMouseWheel(event: WheelEvent): void {
         let delta = 0;
         if (event.deltaY) { /* IE/Opera. */
-            delta = event.deltaY / 120;
+            delta = -event.deltaY / 100;
         }
         else if (event.detail) { /* Mozilla case. */
             // In Mozilla, sign of delta is different than in IE.

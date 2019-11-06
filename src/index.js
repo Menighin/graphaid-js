@@ -10,7 +10,7 @@ window.onload = function() {
             id: id++,
             value: 10
         }));
-    }, 10);
+    }, 1000);
     // debugger;
     // for (let i = 0; i < 10; i++) {
     //     gaid.addNode(new GraphNode({

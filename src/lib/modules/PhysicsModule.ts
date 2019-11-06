@@ -115,7 +115,7 @@ export default class PhysicsModule implements IDrawable{
 
         if (this._bodies.length === 0) return;
 
-        this._tree.debug = true;
+        //this._tree.debug = true;
         this._tree.draw(drawerModule);
 
         for (const body of this._bodies) {
