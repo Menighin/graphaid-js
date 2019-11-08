@@ -41,7 +41,7 @@ export default class PhysicsModule implements IDrawable{
 
         this._tree = this.generateTree();
         this._step++;
-
+        
         const timeFrame = 0.4;
 
         let averageSpeed = 0;

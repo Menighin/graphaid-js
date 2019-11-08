@@ -3,6 +3,7 @@ import Shape from "./models/Shape";
 import Circle from "./models/Circle";
 import Line from "./models/Line";
 import Text from "./models/Text";
+import IPoint from "@models/interfaces/IPoint";
 
 export default class DrawerModule {
 
@@ -117,6 +118,15 @@ export default class DrawerModule {
     }
 
     private drawCircle(circle: Circle): void {
+
+        if (!this.isVisible(circle.position, circle.radius)) {
+            console.log('not');
+            return;
+        }
+
+        console.log('yes');
+
+
         const ctx = this._canvas.ctx;
         ctx.moveTo(circle.position.x + circle.radius, circle.position.y);
         ctx.arc(circle.position.x, circle.position.y, circle.radius, 0, 2 * Math.PI);
@@ -132,5 +142,23 @@ export default class DrawerModule {
             else
                 ctx.lineTo(point.x, point.y);
         }
+    }
+
+    private isVisible(point: IPoint, radius: number = 0): boolean {
+
+        const t = this._canvas.ctx.getTransform();
+        const tPoint: IPoint = {x: point.x * t.a + t.e, y: point.y * t.a + t.f}
+        const cWidth = this._canvas.ctx.canvas.width;
+        const cHeight = this._canvas.ctx.canvas.height;
+
+        if (tPoint.x + radius < 0 ||
+            tPoint.x - radius > cWidth ||
+            tPoint.y + radius > 0 ||
+            tPoint.y - radius > cHeight
+            )
+            return false;
+
+        return true;
+
     }
 }

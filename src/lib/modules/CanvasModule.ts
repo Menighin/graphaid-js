@@ -92,7 +92,7 @@ export default class CanvasModule implements IInteractionHandler, ICanvas {
     }
 
     public onMouseMove(pointer: IPointer): void {
-        console.log('mouse move');
+        // console.log('mouse move');
     }
 
     public onMouseWheel(pointer: IPointer, value: number): void {
