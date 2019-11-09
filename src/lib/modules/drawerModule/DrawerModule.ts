@@ -119,13 +119,7 @@ export default class DrawerModule {
 
     private drawCircle(circle: Circle): void {
 
-        if (!this.isVisible(circle.position, circle.radius)) {
-            console.log('not');
-            return;
-        }
-
-        console.log('yes');
-
+        if (!this.isVisible(circle.position, circle.radius + circle.lineWidth)) return;
 
         const ctx = this._canvas.ctx;
         ctx.moveTo(circle.position.x + circle.radius, circle.position.y);
@@ -151,14 +145,13 @@ export default class DrawerModule {
         const cWidth = this._canvas.ctx.canvas.width;
         const cHeight = this._canvas.ctx.canvas.height;
 
-        if (tPoint.x + radius < 0 ||
-            tPoint.x - radius > cWidth ||
-            tPoint.y + radius > 0 ||
-            tPoint.y - radius > cHeight
+        if (tPoint.x + radius * t.a < 0 ||
+            tPoint.x - radius * t.a > cWidth ||
+            tPoint.y + radius * t.a < 0 ||
+            tPoint.y - radius * t.a > cHeight
             )
             return false;
 
         return true;
-
     }
 }
