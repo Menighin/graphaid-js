@@ -8,6 +8,7 @@ import GraphNode from './models/GraphNode';
 import Point from './models/Point';
 import PhysicsModule from './modules/PhysicsModule';
 import Text from './modules/drawerModule/models/Text';
+import GraphEdge from '@models/GraphEdge';
 
 export default class Graphaid implements IDrawable {
 
@@ -15,6 +16,8 @@ export default class Graphaid implements IDrawable {
     private _physicsModule: PhysicsModule;
     private _nodes: GraphNode[] = [];
     private _nodesById: Record<number, GraphNode> = {};
+    private _edges: GraphEdge[] = [];
+    private _edgesById: Record<string, GraphEdge> = {};
 
     constructor(div: string) {
         this._canvasModule = new CanvasModule(div);
@@ -30,13 +33,23 @@ export default class Graphaid implements IDrawable {
         this._canvasModule.initDraw();
     }
 
-    public addNode(node: GraphNode) {
+    public addNode(node: GraphNode): void {
         if (this._nodesById[node.id] !== undefined)
             throw `A node with ID ${node.id} already exists!`;
 
         this._nodes.push(node);
         this._nodesById[node.id] = node;
-        this._physicsModule.insert(node);
+        this._physicsModule.insertBody(node);
+        this._canvasModule.requestRedraw();
+    }
+
+    public addEdge(edge: GraphEdge): void {
+        if (this._edgesById[edge.id] !== undefined)
+            throw `An edge with ID ${edge.id} already exists!`;
+
+        this._edges.push(edge);
+        this._edgesById[edge.id] = edge;
+        this._physicsModule.insertConnection(edge);
         this._canvasModule.requestRedraw();
     }
 
@@ -44,6 +57,7 @@ export default class Graphaid implements IDrawable {
         if (!this._physicsModule.isStabilized)
             this._physicsModule.simulateStep();
 
+        // Draw the middle point of gravity
         drawerModule.bufferShape(new Circle({
             layer: 100,
             radius: 3,
@@ -52,6 +66,16 @@ export default class Graphaid implements IDrawable {
             isFilled: true
         }));
 
+        // Draw nodes and edges
+        this.drawNodes(drawerModule);
+        this.drawEdges(drawerModule);
+        
+        // If not stabilized, keep redrawing
+        if (!this._physicsModule.isStabilized)
+            this._canvasModule.requestRedraw();
+    }
+
+    private drawNodes(drawerModule: DrawerModule) : void {
         for (const node of this._nodes) {
             const circle = new Circle({
                 layer: 10,
@@ -62,7 +86,6 @@ export default class Graphaid implements IDrawable {
             });
 
             drawerModule.bufferShape(circle);
-
 
             if (window.graphaidDebug.nodeLabels) {
                 drawerModule.bufferText(new Text({
@@ -77,8 +100,11 @@ export default class Graphaid implements IDrawable {
                 }))
             }
         }
-        
-        if (!this._physicsModule.isStabilized)
-            this._canvasModule.requestRedraw();
+    }
+
+    private drawEdges(drawerModule: DrawerModule) : void {
+        for (const edge of this._edges) {
+            
+        }
     }
 }

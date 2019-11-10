@@ -1,4 +1,4 @@
-import BarnesHutTree, { IBody, BarnesHutNode } from "../models/BarnesHutTree";
+import BarnesHutTree, { IBody, BarnesHutNode, IConnection } from "../models/BarnesHutTree";
 import Point from "../models/Point";
 import IPoint from "../models/interfaces/IPoint";
 import IDrawable from "./interfaces/IDrawable";
@@ -23,7 +23,7 @@ export default class PhysicsModule implements IDrawable{
         this.isStabilized = false;
     }
 
-    public insert(body: IBody): void {
+    public insertBody(body: IBody): void {
         if (this._bodies.any())
             this.calculateInitialPosition(body);
 
@@ -33,6 +33,10 @@ export default class PhysicsModule implements IDrawable{
         
         // Re-stabilize
         this._isStabilized = false;
+    }
+
+    public insertConnection(connection: IConnection): void {
+        
     }
 
     public simulateStep(): void {

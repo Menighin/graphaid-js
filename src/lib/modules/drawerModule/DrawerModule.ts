@@ -106,6 +106,12 @@ export default class DrawerModule {
             ctx.textBaseline = textProperties.textBaseline;
             
             for (const text of texts) {
+
+                const textMeasure = ctx.measureText(text.text);
+                const textRadius = textMeasure.width / 2;
+
+                if (!this.isVisible(text.position, textRadius)) continue;
+
                 if (textProperties.isStroke)
                     ctx.strokeText(text.text, text.position.x, text.position.y);
                 

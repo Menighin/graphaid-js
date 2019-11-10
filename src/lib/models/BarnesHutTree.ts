@@ -309,3 +309,9 @@ export interface IBody {
     readonly position: Point,
     readonly mass: number
 }
+
+export interface IConnection {
+    readonly id: string,
+    readonly from: number,
+    readonly to: number
+}
