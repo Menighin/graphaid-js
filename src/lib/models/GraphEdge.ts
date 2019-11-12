@@ -27,7 +27,7 @@ export default class GraphEdge implements IConnection {
     public set isBidirectional(value) { this._isBidirectional = value; }
 
     constructor(init: Partial<GraphEdge>) {
-        if (!init.from || !init.to)
+        if (init.from === undefined || init.to === undefined)
             throw new Error('[from] and [to] are mandatory while creating a GraphEdge');
         Object.assign(this, init);        
     }

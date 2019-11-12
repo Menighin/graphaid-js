@@ -9,6 +9,7 @@ import Point from './models/Point';
 import PhysicsModule from './modules/PhysicsModule';
 import Text from './modules/drawerModule/models/Text';
 import GraphEdge from '@models/GraphEdge';
+import Line from './modules/drawerModule/models/Line';
 
 export default class Graphaid implements IDrawable {
 
@@ -104,7 +105,14 @@ export default class Graphaid implements IDrawable {
 
     private drawEdges(drawerModule: DrawerModule) : void {
         for (const edge of this._edges) {
-            
+            const n1 = this._nodesById[edge.from];
+            const n2 = this._nodesById[edge.to];
+            drawerModule.bufferShape(new Line({
+                points: [
+                    n1.position,
+                    n2.position
+                ]
+            }));
         }
     }
 }
