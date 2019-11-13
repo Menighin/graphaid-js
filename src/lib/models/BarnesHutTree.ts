@@ -14,11 +14,14 @@ export default class BarnesHutTree implements IDrawable {
     public get debug() { return this._debug; }
     public set debug(value) { this._debug = value; }
 
+    private _bodiesById: Record<number, IBody> = {};
+    private _connectionsById: Record<number, IBody[]> = {};
+
     constructor(topLeft: Point, bottomRight: Point) {
         this.root = new BarnesHutNode(new BarnesHutRegion(topLeft, bottomRight, 'root'));
     }
 
-    public insert(body: IBody): void {
+    public insertBody(body: IBody): void {
         let nodeToPlace = this.root;
 
         // Search for a place to hide the body 🤫
@@ -42,7 +45,25 @@ export default class BarnesHutTree implements IDrawable {
         }
 
         this.calculateMassCenter(this._root);
+
+        this._bodiesById[body.id] = body;
     }
+
+    public insertConnection(connection: IConnection): void {
+
+        if (this._bodiesById[connection.from] === undefined || this._bodiesById[connection.to] === undefined)
+            throw 'Tried to create a connection with non-existing body';
+
+        if (this._connectionsById[connection.from] === undefined)
+            this._connectionsById[connection.from] = [];
+
+        if (this._connectionsById[connection.to] === undefined)
+            this._connectionsById[connection.to] = [];
+
+        this._connectionsById[connection.from].push(this._bodiesById[connection.to]);
+        this._connectionsById[connection.to].push(this._bodiesById[connection.from]);
+    }
+
 
     private splitNewRegions(parent: BarnesHutNode): void {
         const pr = parent.region;

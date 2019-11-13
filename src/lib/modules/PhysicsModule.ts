@@ -9,6 +9,7 @@ import Text from "./drawerModule/models/Text";
 export default class PhysicsModule implements IDrawable{
 
     private _bodies: IBody[];
+    private _connections: IConnection[];
     private _speedByBodyId: Record<number, {vx: number, vy: number}>;
     private _tree: BarnesHutTree;
     private _step = 0;
@@ -36,7 +37,7 @@ export default class PhysicsModule implements IDrawable{
     }
 
     public insertConnection(connection: IConnection): void {
-        
+        this._connections.push(connection);
     }
 
     public simulateStep(): void {
@@ -110,7 +111,7 @@ export default class PhysicsModule implements IDrawable{
         // Creating the tree
         const tree = new BarnesHutTree(topLeftMost, bottomRightMost);
 
-        this._bodies.forEach(n => tree.insert(n));
+        this._bodies.forEach(n => tree.insertBody(n));
 
         return tree;
     }
