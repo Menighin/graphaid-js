@@ -20,6 +20,7 @@ export default class PhysicsModule implements IDrawable{
 
     constructor() {
         this._bodies = [];
+        this._connections = [];
         this._speedByBodyId = {};
         this.isStabilized = false;
     }
@@ -112,6 +113,7 @@ export default class PhysicsModule implements IDrawable{
         const tree = new BarnesHutTree(topLeftMost, bottomRightMost);
 
         this._bodies.forEach(n => tree.insertBody(n));
+        this._connections.forEach(c => tree.insertConnection(c));
 
         return tree;
     }

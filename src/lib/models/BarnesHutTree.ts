@@ -15,7 +15,7 @@ export default class BarnesHutTree implements IDrawable {
     public set debug(value) { this._debug = value; }
 
     private _bodiesById: Record<number, IBody> = {};
-    private _connectionsById: Record<number, IBody[]> = {};
+    private _connectionsById: Record<number, Set<number>> = {};
 
     constructor(topLeft: Point, bottomRight: Point) {
         this.root = new BarnesHutNode(new BarnesHutRegion(topLeft, bottomRight, 'root'));
@@ -47,6 +47,7 @@ export default class BarnesHutTree implements IDrawable {
         this.calculateMassCenter(this._root);
 
         this._bodiesById[body.id] = body;
+        this._connectionsById[body.id] = new Set<number>();
     }
 
     public insertConnection(connection: IConnection): void {
@@ -54,14 +55,8 @@ export default class BarnesHutTree implements IDrawable {
         if (this._bodiesById[connection.from] === undefined || this._bodiesById[connection.to] === undefined)
             throw 'Tried to create a connection with non-existing body';
 
-        if (this._connectionsById[connection.from] === undefined)
-            this._connectionsById[connection.from] = [];
-
-        if (this._connectionsById[connection.to] === undefined)
-            this._connectionsById[connection.to] = [];
-
-        this._connectionsById[connection.from].push(this._bodiesById[connection.to]);
-        this._connectionsById[connection.to].push(this._bodiesById[connection.from]);
+        this._connectionsById[connection.from].add(connection.to);
+        this._connectionsById[connection.to].add(connection.from);
     }
 
 
@@ -199,10 +194,28 @@ export default class BarnesHutTree implements IDrawable {
         const dy = -body.position.y;
         const distanceToCenter = Math.sqrt(dx * dx + dy * dy);
         if (distanceToCenter > 0) {
-            const gravity = 2 * 9.8 / distanceToCenter;
+            const gravity = 2 * 5 / distanceToCenter;
             res.fx += dx * gravity;
             res.fy += dy * gravity;
         }
+
+        // Calculating edges force
+        const springConstant = 0.5;
+        const springLength = 50;
+        const connections = this._connectionsById[body.id];
+        if (connections.size > 0) {
+            for (const cId of connections) {
+                const to = this._bodiesById[cId];
+                const distance = Math.max(body.position.distanceTo(to.position), 0.01);
+                const springForce = springConstant * (springLength - distance) / distance;
+                const dx = body.position.x - to.position.x;
+                const dy = body.position.y - to.position.y;
+
+                res.fx += dx * springForce;
+                res.fy += dy * springForce;
+            }
+        }
+
 
         return res;
     }

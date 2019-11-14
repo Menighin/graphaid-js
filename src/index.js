@@ -24,7 +24,7 @@ window.onload = function() {
     for (let i = 0; i < 10; i++) {
         gaid.addEdge(new GraphEdge({
             from: i,
-            to: ++i,
+            to: (i + 1) % 10,
             value: i * 2
         }));
     }
